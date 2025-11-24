@@ -13,7 +13,7 @@ const generateRandomString = (length) => {
 };
 
 // Cron job: setiap hari pukul 09:00
-cron.schedule("0 12 * * *", async () => {
+cron.schedule("0 13 * * *", async () => {
     try {
         const currentDate = moment().format("YYYY-MM-DD");
 
