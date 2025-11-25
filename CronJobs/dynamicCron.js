@@ -3,7 +3,7 @@ const moment = require("moment");
 const conn = require("../Database/ConfigDB");
 let task = null;
 
-// jalankan absensi otomatis
+// jalankan absensi otomatis // piye iki
 async function runJob() {
     const currentDate = moment().format("YYYY-MM-DD");
 
