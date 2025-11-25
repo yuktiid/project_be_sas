@@ -77,11 +77,15 @@ app.use('/naik', EPNaikKelas)
 //Setting
 app.use('/setting', EPSetting)
 
+
 //Absensi
 app.use('/absensi', EPAbsensi)
 
 // Cron job otomatis dijalankan setiap hari pukul yang ditentukan
-require('./CronJobs/cron'); // Pastikan cron job terjadwal
+// require('./CronJobs/cron'); // Pastikan cron job terjadwal
+const { startDynamicCron } = require('./CronJobs/dynamicCron');
+startDynamicCron();
+
 
 app.listen(PORT, ()=>{
     console.log(`brtjalan di PORT http://localhost:${PORT}`)

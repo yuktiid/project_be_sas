@@ -252,6 +252,87 @@ router.get('/all-instansi', async (req, res) => {
     }
 });
 
+// UPDATE / TAMBAH batas_absen UNTUK SEMUA HARI TANPA MENGUBAH JAM MASUK / PULANG
+router.post('/update-batas-absen', async (req, res) => {
+    try {
+        const { batas_absen } = req.body;
+
+        if (!batas_absen) {
+            return res.status(400).json({
+                message: "Field batas_absen wajib diisi"
+            });
+        }
+
+        // Cek apakah ada setting lama
+        const existing = await conn("setting").select("id_setting");
+
+        if (existing.length === 0) {
+            // Jika tabel kosong → buat 1 baris saja
+            await conn("setting").insert({
+                id_setting: generateRandomString(5),
+                hari: "Senin", // default (boleh ubah kalau mau)
+                jam_masuk: JSON.stringify(["07:00", "08:00"]),
+                jam_pulang: JSON.stringify(["14:00", "16:00"]),
+                jam_terlambat: JSON.stringify(["08:00", "08:30"]),
+                batas_absen
+            });
+
+            return res.status(201).json({
+                message: "Setting baru dibuat dan batas_absen ditambahkan"
+            });
+        }
+
+        // Jika sudah ada → update semua baris setting yang ada
+        await conn("setting").update({ batas_absen });
+        const { startDynamicCron } = require("../CronJobs/dynamicCron");
+startDynamicCron();
+
+        return res.status(200).json({
+            message: "batas_absen berhasil diperbarui di semua hari"
+        });
+
+    } catch (error) {
+        console.error("Error update batas_absen:", error);
+        res.status(500).json({
+            message: "Gagal update batas_absen",
+            error
+        });
+    }
+});
+
+// ===============================
+//  GET batas_absen
+// ===============================
+router.get('/get-batas-absen', async (req, res) => {
+    try {
+        // Ambil batas_absen dari salah satu row (karena kamu update semua baris)
+        const data = await conn("setting")
+            .select("batas_absen")
+            .whereNotNull("batas_absen")
+            .first();
+
+        if (!data) {
+            return res.status(200).json({
+                success: true,
+                message: "Belum ada batas_absen",
+                data: null
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: data
+        });
+
+    } catch (error) {
+        console.error("Error GET batas_absen:", error);
+        res.status(500).json({
+            success: false,
+            message: "Gagal mengambil batas_absen"
+        });
+    }
+});
+
 
 
   module.exports = router;
